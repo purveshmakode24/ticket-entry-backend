@@ -41,8 +41,13 @@ const createTicket = async (newTicketPayload) => {
     try {
         console.log('---> STARTED - supportTicketService - createTicket');
         const createdTicket = await Ticket.create(newTicketPayload);
-        assignTicketToAgent(createdTicket);
-        return createdTicket;
+        const success = await assignTicketToAgent(createdTicket);
+        let message = 'Ticket successfully is created. '
+        if (!success) {
+            console.log('Ticket is created, but no active agents available to assign ticket right now.');
+            message += 'but no active agents available to assign ticket right now.';
+        }
+        return [createdTicket, message];
     } catch (err) {
         console.error('Error inserting data into db:', err);
         throw new Error(err?.message || 'Some error occured.');
@@ -66,10 +71,7 @@ const assignTicketToAgent = async (createdTicket) => {
         }
     }
 
-    if (!activeAgentFound) {
-        console.log("No agents are active right now.");
-        throw new Error("No agents are active right now.");
-    }
+    return activeAgentFound;
 }
 
 const resolveTicket = async (ticketId) => {

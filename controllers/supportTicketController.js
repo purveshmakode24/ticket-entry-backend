@@ -161,8 +161,8 @@ api.post('/', async (req, res) => {
     try {
         console.log('---> STARTED - Support Ticket POST Controller');
         const newTicketPayload = req.body;
-        const result = await createTicket(newTicketPayload);
-        res.status(HTTP_STATUS.CREATED).json(result);
+        const ct = await createTicket(newTicketPayload);
+        res.status(HTTP_STATUS.CREATED).json({ data: ct[0], message: ct[1] });
     } catch (err) {
         console.error('Some Error Occured:', err);
         res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ error: err.toString() });
@@ -197,7 +197,7 @@ api.put('/resolve/:ticketId', async (req, res) => {
         console.log('---> STARTED - Support Ticket PUT Controller');
         const { ticketId } = req.params;
         const resp = await resolveTicket(ticketId);
-        res.status(HTTP_STATUS.OK).json({ 'message': "Ticket Successfully Resolved!", 'resolvedOn':  resp.resolvedOn});
+        res.status(HTTP_STATUS.OK).json({ 'message': "Ticket Successfully Resolved!", 'resolvedOn': resp.resolvedOn });
     } catch (err) {
         console.error('Some Error Occured:', err);
         res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ error: err.toString() });
