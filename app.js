@@ -11,12 +11,14 @@ const PORT = process.env.PORT || 8000;
 
 app.use(cors());
 app.use(express.json());
+const swaggerSpec = swaggerJSdoc(SWAGGER_OPTIONS);
+app.use('/docs', swagger.serve, swagger.setup(swaggerSpec));
 
 const isDebug = process.env.DEBUG === 'true';
 const mongoURI = isDebug ? `${DB.URI}/${DB.NAME}` : process.env.MONGODB_PROD_URI;
 
 // Mongoose/MongoDB Connection
-mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(mongoURI)
     .then(() => {
         console.log('Connected to MongoDB');
         // Start the app server once the mongo connection is establised.
@@ -31,8 +33,7 @@ app.get('/', (req, res) => {
     res.redirect('/docs');
 });
 
-const swaggerSpec = swaggerJSdoc(SWAGGER_OPTIONS);
-app.use('/docs', swagger.serve, swagger.setup(swaggerSpec));
+
 app.use('/api/support-agents', supportAgentRoutes);
 app.use('/api/support-tickets', supportTicketRoutes);
 
