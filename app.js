@@ -18,10 +18,10 @@ app.use(express.json());
 
 
 const isDebug = process.env.DEBUG === 'true';
-const mongoURI = isDebug ? `${DB.URI}/${DB.NAME}` : DB.PROD_URI;
+const mongoURI = isDebug ? `${DB.URI}/${DB.NAME}` : process.env.PROD_MONGODB_URI;
 
 // Mongoose/MongoDB Connection
-mongoose.connect(mongoURI)
+mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => {
         console.log('Connected to MongoDB');
         // Start the app server once the mongo connection is establised.
@@ -37,7 +37,7 @@ app.get('/', (req, res) => {
 });
 
 const swaggerSpec = swaggerJSdoc(SWAGGER_OPTIONS);
-app.use('/api-docs', express.static('node_modules/swagger-ui-dist/', {index: false}), swagger.serve, swagger.setup(swaggerSpec));
+app.use('/api-docs', express.static('node_modules/swagger-ui-dist/', { index: false }), swagger.serve, swagger.setup(swaggerSpec));
 app.use('/api/support-agents', supportAgentRoutes);
 app.use('/api/support-tickets', supportTicketRoutes);
 
