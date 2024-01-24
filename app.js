@@ -15,7 +15,7 @@ const swaggerSpec = swaggerJSdoc(SWAGGER_OPTIONS);
 app.use('/docs', swagger.serve, swagger.setup(swaggerSpec));
 
 const isDebug = process.env.DEBUG === 'true';
-const mongoURI = isDebug ? `${DB.URI}/${DB.NAME}` : process.env.MONGODB_PROD_URI;
+const mongoURI = isDebug ? `${DB.URI}/${DB.NAME}` : DB.PROD_URI;
 
 // Mongoose/MongoDB Connection
 mongoose.connect(mongoURI)

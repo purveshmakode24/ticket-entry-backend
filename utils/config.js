@@ -1,5 +1,6 @@
 const DB = {
     URI: 'mongodb://localhost:27017',
+    PROD_URI: `mongodb+srv://purvesh123:${process.env.PROD_MONGODB_PASSWORD}@ticket-entry-system.znmqll6.mongodb.net/?retryWrites=true&w=majority`,
     NAME: 'support_ticket_entry_system_db'
 }
 
