@@ -12,8 +12,11 @@ const PORT = 8000;
 app.use(cors());
 app.use(express.json());
 
+const isDebug = process.env.DEBUG === 'false';
+const mongoURI = isDebug ? `${DB.URI}/${DB.NAME}` : process.env.MONGODB_PROD_URI;
+
 // Mongoose/MongoDB Connection
-mongoose.connect(`${DB.URI}/${DB.NAME}`, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => {
         console.log('Connected to MongoDB');
         // Start the app server once the mongo connection is establised.
