@@ -10,8 +10,6 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 8000;
 
-const router = express.Router();
-
 app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
@@ -37,7 +35,8 @@ app.get('/', (req, res) => {
 });
 
 const swaggerSpec = swaggerJSdoc(SWAGGER_OPTIONS);
-app.use('/api-docs', express.static('node_modules/swagger-ui-dist/', { index: false }), swagger.serve, swagger.setup(swaggerSpec));
+app.use('/api-docs', express.static('node_modules/swagger-ui-dist/',
+    { index: false }), swagger.serve, swagger.setup(swaggerSpec));
 app.use('/api/support-agents', supportAgentRoutes);
 app.use('/api/support-tickets', supportTicketRoutes);
 
