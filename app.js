@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const swagger = require('swagger-ui-express');
 const swaggerJSdoc = require('swagger-jsdoc');
+const path = require('path');
 const supportAgentRoutes = require('./controllers/supportAgentController');
 const supportTicketRoutes = require('./controllers/supportTicketController');
 const { SWAGGER_OPTIONS, DB } = require('./utils/config');
@@ -12,6 +13,7 @@ const PORT = process.env.PORT || 8000;
 const router = express.Router();
 
 app.use(cors());
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
 
