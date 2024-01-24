@@ -12,7 +12,7 @@ const PORT = 8000;
 app.use(cors());
 app.use(express.json());
 
-const isDebug = process.env.DEBUG === 'false';
+const isDebug = process.env.DEBUG === 'true';
 const mongoURI = isDebug ? `${DB.URI}/${DB.NAME}` : process.env.MONGODB_PROD_URI;
 
 // Mongoose/MongoDB Connection
