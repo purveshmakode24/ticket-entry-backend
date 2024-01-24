@@ -35,3 +35,5 @@ const swaggerSpec = swaggerJSdoc(SWAGGER_OPTIONS);
 app.use('/docs', swagger.serve, swagger.setup(swaggerSpec));
 app.use('/api/support-agents', supportAgentRoutes);
 app.use('/api/support-tickets', supportTicketRoutes);
+
+module.exports = app;
