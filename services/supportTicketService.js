@@ -1,6 +1,6 @@
 const Ticket = require('../models/supportTicket');
 const { STATUS } = require('../utils');
-const AgentService = require('./supportAgentService');
+const { ticketQueue, agentQueue } = require('../utils/queue');
 
 const getTickets = async ({ status, assignedTo, severity, type, sortBy, sortOrder, page, pageSize }) => {
     try {
@@ -36,7 +36,6 @@ const getTickets = async ({ status, assignedTo, severity, type, sortBy, sortOrde
     }
 };
 
-
 const createTicket = async (newTicketPayload) => {
     try {
         console.log('---> STARTED - supportTicketService - createTicket');
@@ -46,6 +45,8 @@ const createTicket = async (newTicketPayload) => {
         msg += success
             ? 'And Agent is assigend.'
             : 'Agent will get assigned once available';
+
+        ticketQueue.push(createdTicket);
         return [createdTicket, msg];
     } catch (err) {
         console.error('Error inserting data into db:', err);
@@ -57,15 +58,15 @@ const createTicket = async (newTicketPayload) => {
 
 const assignTicketToAgent = async (createdTicket) => {
     let isAgentAssigned = false;
-    const N = AgentService.agentQueue.length;
+    const N = agentQueue.length;
 
     // Looping till N to avoid infite loop if all the agents are inactive.
     for (let i = 0; i < N; ++i) {
-        const agent = await AgentService.agentQueue.shift(); // pop the agent
+        const agent = await agentQueue.shift(); // pop the agent
 
         // Agent not active
         if (!agent.active) {
-            await AgentService.agentQueue.push(agent);
+            agentQueue.push(agent);
         }
         
         // Agent active
@@ -75,7 +76,7 @@ const assignTicketToAgent = async (createdTicket) => {
             createdTicket.status = STATUS.ASSIGNED;
             isAgentAssigned = true;
             await createdTicket.save();  // Save the changes in db
-            await AgentService.agentQueue.push(agent); // Push to the back of agentQueue.
+            agentQueue.push(agent); // Push to the back of agentQueue.
             break;
         }
     }
