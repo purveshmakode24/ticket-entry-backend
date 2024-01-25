@@ -1,4 +1,3 @@
-const Agent = require('../models/supportAgent');
 const Ticket = require('../models/supportTicket');
 const { STATUS } = require('../utils');
 const AgentService = require('./supportAgentService');
@@ -37,17 +36,17 @@ const getTickets = async ({ status, assignedTo, severity, type, sortBy, sortOrde
     }
 };
 
+
 const createTicket = async (newTicketPayload) => {
     try {
         console.log('---> STARTED - supportTicketService - createTicket');
         const createdTicket = await Ticket.create(newTicketPayload);
         const success = await assignTicketToAgent(createdTicket);
-        let message = 'Ticket successfully is created. '
-        if (!success) {
-            console.log('Ticket is created, but no active agents available to assign ticket right now.');
-            message += 'but no active agents available to assign ticket right now.';
-        }
-        return [createdTicket, message];
+        let msg = 'Ticket successfully is created. '
+        msg += success
+            ? 'And Agent is assigend.'
+            : 'Agent will get assigned once available';
+        return [createdTicket, msg];
     } catch (err) {
         console.error('Error inserting data into db:', err);
         throw new Error(err?.message || 'Some error occured.');
@@ -57,68 +56,34 @@ const createTicket = async (newTicketPayload) => {
 };
 
 const assignTicketToAgent = async (createdTicket) => {
-    const agents = await AgentService.getAllAgents();
-    let activeAgentFound = false;
-    for (let agent of agents) {
+    let isAgentAssigned = false;
+    const N = AgentService.agentQueue.length;
+
+    // Looping till N to avoid infite loop if all the agents are inactive.
+    for (let i = 0; i < N; ++i) {
+        const agent = await AgentService.agentQueue.shift(); // pop the agent
+
+        // Agent not active
+        if (!agent.active) {
+            await AgentService.agentQueue.push(agent);
+        }
+        
+        // Agent active
         if (agent.active) {
-            activeAgentFound = true;
+            // Assign this agent to the ticket
             createdTicket.assignedTo = agent.name;
             createdTicket.status = STATUS.ASSIGNED;
-            await createdTicket.save();
-            agent.active = false;
-            await agent.save();
+            isAgentAssigned = true;
+            await createdTicket.save();  // Save the changes in db
+            await AgentService.agentQueue.push(agent); // Push to the back of agentQueue.
             break;
         }
     }
 
-    return activeAgentFound;
-}
-
-const resolveTicket = async (ticketId) => {
-    try {
-        const ticketToResolve = await Ticket.findById(ticketId);
-        // Resolve the ticket.
-        ticketToResolve.status = STATUS.RESOLVED;
-        ticketToResolve.resolvedOn = Date.now();
-
-        ticketToResolve.save();
-
-
-        // Potential unassigned agent.
-        const agent = await Agent.findOne({ 'name': ticketToResolve.assignedTo });
-
-        // First check if there are any unassigned new tickets available in db, 
-        // if there is, then add the above agent to first unallocated ticket from db.
-        let unallocatedTicketFound = false;
-        const tickets = await Ticket.find();
-        for (let ticket of tickets) {
-            if (ticket.assignedTo == null) {
-                unallocatedTicketFound = true;
-                // Assign this agent to this ticket
-                ticket.assignedTo = agent.name;
-                ticket.status = STATUS.ASSIGNED;
-                ticket.save();
-                break;
-            }
-        }
-
-        if (!unallocatedTicketFound) {
-            // Make this agent active, if there are no unallocated ticket. 
-            // (means all tickets in db are already allocated to the agents)
-            agent.active = true;
-            await agent.save();
-        }
-
-        return { 'resolvedOn': ticketToResolve.resolvedOn }
-
-    } catch (err) {
-        console.error('Error while resolving ticket:', err);
-        throw new Error(err || 'Some error occured.');
-    }
+    return isAgentAssigned;
 }
 
 module.exports = {
     getTickets,
-    createTicket,
-    resolveTicket
+    createTicket
 };
