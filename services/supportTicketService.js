@@ -62,7 +62,7 @@ const assignTicketToAgent = async (createdTicket) => {
 
     // Looping till N to avoid infite loop if all the agents are inactive.
     for (let i = 0; i < N; ++i) {
-        const agent = await agentQueue.shift(); // pop the agent
+        const agent = await agentQueue.shift(); // pop the agent from left
 
         // Agent not active
         if (!agent.active) {

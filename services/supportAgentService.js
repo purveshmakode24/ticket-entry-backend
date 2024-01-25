@@ -39,7 +39,7 @@ const assignAgentToTicket = async (createdAgent) => {
 
     // Looping till N to avoid infite loop if all the tickets are allocated (not New).
     for (let i = 0; i < N; ++i) {
-        const ticket = await ticketQueue.shift(); // pop the agent
+        const ticket = await ticketQueue.shift(); // pop the ticket from left
 
         // Ticket is not New
         if (ticket.status == STATUS.ASSIGNED || ticket.status == STATUS.RESOLVED) {
