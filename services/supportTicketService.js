@@ -13,10 +13,10 @@ const getTickets = async ({ status, assignedTo, severity, type, sortBy, sortOrde
             filters['status'] = status;
         }
         if (assignedTo) {
-            filters['assignedTo'];
+            filters['assignedTo'] = assignedTo;
         }
         if (severity) {
-            filters['severity'];
+            filters['severity'] = severity;
         }
         if (type) {
             filters['type'] = type;
