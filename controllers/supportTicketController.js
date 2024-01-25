@@ -1,6 +1,6 @@
 const express = require('express');
 const api = express.Router();
-const { getTickets, createTicket, resolveTicket } = require('../services/supportTicketService');
+const { getTickets, createTicket } = require('../services/supportTicketService');
 const { HTTP_STATUS } = require('../utils');
 
 /**
@@ -170,41 +170,6 @@ api.post('/', async (req, res) => {
         console.log('---> ENDED - Support Ticket POST Controller');
     }
 });
-
-
-// /**
-//  * @openapi
-//  * /api/support-tickets/resolve/{ticketId}:
-//  *   put:
-//  *     description: Resolve the ticket and make the assigned Agent active.
-//  *     tags: [SupportTicket]
-//  *     parameters:
-//  *       - in: path
-//  *         name: ticketId
-//  *         description: ID of the ticket to be resolved.
-//  *         required: true
-//  *     responses:
-//  *       200:
-//  *         description: Resolves the ticket.
-//  *         content:
-//  *           application/json:
-//  *             schema:
-//  *               $ref: '#/components/schemas/Ticket'
-//  *         
-//  */
-// api.put('/resolve/:ticketId', async (req, res) => {
-//     try {
-//         console.log('---> STARTED - Support Ticket PUT Controller');
-//         const { ticketId } = req.params;
-//         const resp = await resolveTicket(ticketId);
-//         res.status(HTTP_STATUS.OK).json({ 'message': "Ticket Successfully Resolved!", 'resolvedOn': resp.resolvedOn });
-//     } catch (err) {
-//         console.error('Some Error Occured:', err);
-//         res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ error: err.toString() });
-//     } finally {
-//         console.log('---> ENDED - Support Ticket PUT Controller');
-//     }
-// });
 
 
 module.exports = api;
